@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "humanizer-pl",
+  "description": "Usuwa oznaki AI-pisania z polskich tekstów: 41 wzorców (GPT-izmy, kalki składniowe, typografia PWN, fleksja), rozpoznanie gatunku, audyt semantyczny, wyjątek dla rejestru prawniczego.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Paweł Szczęsny",
+    "url": "https://github.com/PawelASzczesny"
+  },
+  "homepage": "https://github.com/PawelASzczesny/humanizer-pl",
+  "repository": "https://github.com/PawelASzczesny/humanizer-pl",
+  "license": "MIT",
+  "keywords": [
+    "writing",
+    "editing",
+    "polish",
+    "humanize",
+    "ai-detection",
+    "styl",
+    "polszczyzna"
+  ]
+}

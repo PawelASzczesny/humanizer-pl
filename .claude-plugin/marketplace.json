@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace-manifest.json",
+  "name": "humanizer-pl",
+  "owner": {
+    "name": "Paweł Szczęsny",
+    "url": "https://github.com/PawelASzczesny"
+  },
+  "description": "Skill humanizer-pl, instalowalny jako wtyczka Claude Code.",
+  "plugins": [
+    {
+      "name": "humanizer-pl",
+      "source": "./",
+      "description": "Usuwa oznaki AI-pisania z polskich tekstów: 41 wzorców, rozpoznanie gatunku, audyt semantyczny, wyjątek dla rejestru prawniczego.",
+      "license": "MIT",
+      "keywords": [
+        "writing",
+        "editing",
+        "polish",
+        "humanize",
+        "ai-detection",
+        "styl",
+        "polszczyzna"
+      ]
+    }
+  ]
+}
