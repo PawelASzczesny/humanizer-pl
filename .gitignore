@@ -1,0 +1,11 @@
+# Profile lokalne: kalibracja głosu i słownik użytkownika zostają na dysku.
+references/*.local.md
+
+# Python
+__pycache__/
+*.py[cod]
+
+# System i środowisko
+.DS_Store
+.env
+.env.*
