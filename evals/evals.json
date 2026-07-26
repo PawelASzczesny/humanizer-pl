@@ -1,0 +1,646 @@
+{
+  "skill": "humanizer-pl",
+  "version": "1.0.0",
+  "description": "Asercje binarne dla humanizer-pl. Każda asercja sprawdza WYJŚCIE skilla (nigdy plików references/, które celowo cytują tellowe przykłady PRZED). Wzorce znakowe zapisane escape'ami \\uXXXX, żeby same wzorce pozostały wolne od glifów (glify żyją tylko w treści case'ów, bo tam są eksponatem). Rdzenie w banned_stems_hard, banned_stems_soft, filler_openers_pl, chatbot_artifacts i konektory_pl to FRAGMENTY WYRAŻEŃ REGULARNYCH (fleksja przez \\w*), dopasowywane z granicą wyrazu \\b i bez rozróżniania wielkości liter. Rdzeń może być łańcuchem albo obiektem {stem, fold, variants, why} — obiekt służy do wyłączenia składania diakrytyków tam, gdzie zlepiłoby ono dwa różne lematy. Podział na twarde (zakaz) i miękkie (gęstość) wynika z bramki G1: rdzeń z udokumentowanym legalnym użyciem nie może być zakazany, bo odrzucałby poprawną polszczyznę. Zestaw case'ów jest zamrożonym kontraktem dla bramki G3. Uruchomienie: python3 evals/run_evals.py",
+  "config": {
+    "banned_stems_hard": [
+      "przełomow\\w*",
+      "rewolucyjn\\w*",
+      "game.?changer",
+      "zmienia wszystko",
+      "zmiana paradygmatu",
+      "zapierając\\w* dech",
+      "tętniąc\\w* życiem",
+      "malownicz\\w*",
+      "must.?have",
+      "must.?see",
+      "uwoln\\w+ (?:pełn\\w+ )?potencjał",
+      "fascynując\\w*",
+      "ekscytując\\w*",
+      "nieocenion\\w*",
+      "bezcenn\\w*",
+      "nie sposób nie zauważyć",
+      "w dzisiejszy\\w*",
+      "w dobie \\w+",
+      "we współczesnym świecie",
+      "w erze cyfrow\\w*",
+      "dynamicznie rozwijając\\w*",
+      "na koniec dnia",
+      "(?:skrojon|szyt)\\w* na miarę",
+      "jawi się jako",
+      "w gruncie rzeczy",
+      "sedno sprawy",
+      "prawdziwe pytanie (?:brzmi|to)",
+      "przyjrzyjmy się",
+      "w (?:tym|niniejszym) artykule (?:omówi|przyjrzy|pokaż)\\w*",
+      "wymierne korzyści"
+    ],
+    "banned_stems_soft": [
+      "kluczow\\w*",
+      "kompleksow\\w*",
+      "innowacyjn\\w*",
+      "dedykowan\\w*",
+      "synergi\\w*",
+      "dynamiczn\\w*",
+      "istotn\\w*",
+      "znacząc\\w*",
+      "fundamentaln\\w*",
+      "holistyczn\\w*",
+      "zaawansowan\\w*",
+      "wielowymiarow\\w*",
+      {
+        "stem": "niezwykle",
+        "fold": false,
+        "why": "Składanie ogonków zlepia ten intensyfikator z przymiotnikiem „niezwykłe”, więc rdzeń pracuje wyłącznie na tekście oryginalnym. W tekście bez ogonków obie formy są nierozróżnialne i świadomie wybieramy przeoczenie zamiast fałszywego alarmu."
+      },
+      "warto (?:zauważyć|podkreślić|wspomnieć|dodać, że)",
+      "należy (?:zauważyć|podkreślić|pamiętać, że)",
+      "bez wątpienia",
+      "podsumowując",
+      "reasumując"
+    ],
+    "filler_openers_pl": [
+      "W dzisiejszym",
+      "W dzisiejszych czasach",
+      "W dobie",
+      "W erze",
+      "We współczesnym",
+      "Nie da się ukryć",
+      "Szczerze mówiąc",
+      "Szczerze?",
+      "Powiedzmy sobie wprost",
+      "Umówmy się",
+      "Przyjrzyjmy się",
+      "W tym artykule",
+      "Wyobraź sobie",
+      "Czy zastanawiałeś się",
+      "Świetne pytanie",
+      "Mam nadzieję",
+      "Oczywiście!"
+    ],
+    "chatbot_artifacts": [
+      "mam nadzieję, że (?:to |ci |Ci )?pomo\\w+",
+      "daj (?:mi )?znać, (?:jeśli|jeżeli|gdyby)",
+      "(?:świetne|doskonałe|dobre) pytanie!",
+      "chętnie pomogę",
+      "służę pomocą",
+      "jako (?:model językowy|sztuczna inteligencja|asystent AI)",
+      "moja wiedza (?:sięga|kończy się|obejmuje okres)",
+      "według stanu na (?:moją|mój) (?:wiedzę|stan wiedzy)",
+      "czy (?:chcesz|chciałbyś|chciałabyś), (?:żebym|abym)",
+      "czy mam (?:kontynuować|rozwinąć|przygotować)",
+      "oto (?:poprawiona|zhumanizowana) wersja",
+      "w razie pytań (?:jestem|pozostaję) do dyspozycji"
+    ],
+    "konektory_pl": [
+      "co więcej",
+      "ponadto",
+      "dodatkowo",
+      "jednocześnie",
+      "z drugiej strony",
+      "w rezultacie",
+      "w konsekwencji",
+      "niemniej jednak",
+      "warto dodać",
+      "z kolei"
+    ],
+    "filler_openers_formuly_pism": [
+      "Warto zauważyć",
+      "Warto podkreślić",
+      "Należy zauważyć",
+      "Należy podkreślić",
+      "Podsumowując",
+      "Reasumując",
+      "Bez wątpienia",
+      "Co więcej",
+      "Ponadto"
+    ]
+  },
+  "assertions": [
+    {
+      "id": "no_em_dash",
+      "type": "custom",
+      "check": "emdash_pl",
+      "desc": "U+2014 legalny wyłącznie jako pauza dialogowa: na początku wiersza ze spacją po nim, a w środku wiersza tylko wtedy, gdy wiersz otwiera pauza dialogowa albo case ma flagę gatunek_literacki. Poza tym U+2014 jest angielskim tellem, bo polską pauzę zdaniową robi półpauza ze spacjami. Przy fladze regula_anty_tell zakazany wszędzie. Przy fladze human_control świadomie NIE zawieszona: tekst ludzki z poprawną typografią dialogową jest jedynym nośnikiem pokrycia dla gałęzi pauzy na początku wiersza, a zawieszenie pozbawiłoby ją strażnika w zestawie golden. Gdyby przyszły tekst kontrolny używał wydawniczej pauzy zdaniowej ze spacjami, decyzja wraca do dyskusji, bo to konwencja wyjścia skilla, a nie reguła polszczyzny."
+    },
+    {
+      "id": "endash_pwn",
+      "type": "custom",
+      "check": "endash_pwn",
+      "desc": "U+2013 legalna w trzech kontekstach normy PWN: między cyframi bez spacji (zakres liczbowy), ze spacjami po obu stronach (pauza zdaniowa), na początku wiersza ze spacją po niej (pauza dialogowa). W case'ach z flagą regula_anty_tell zakazana wszędzie."
+    },
+    {
+      "id": "no_english_quotes",
+      "type": "custom",
+      "check": "english_quotes",
+      "desc": "Cudzysłowy w normie polskiej: zero otwierających U+201C, zero zamykających U+201D bez pary w U+201E, zero par otwartych U+201E i domkniętych prostym \" oraz zero cudzysłowów niedomkniętych w akapicie. Bloki kodu i wstawki w grawisach są maskowane, więc proste \" w kodzie jest legalne."
+    },
+    {
+      "id": "banned_stems_hard",
+      "type": "stems_absent",
+      "source": "config.banned_stems_hard",
+      "match": "\\b<stem>",
+      "case_insensitive": true,
+      "fold_diacritics": true,
+      "desc": "Słownictwo AI bez legalnego użycia w rzeczowej prozie (wzorce 7 i 34): puste modyfikatory, formuły otwarcia i domknięcia, tropy autorytetu. Asercja absolutna, obowiązuje również w rejestrze prawniczym. Składanie diakrytyków sprawia, że rdzenie łapią też tekst pisany bez ogonków."
+    },
+    {
+      "id": "banned_stems_soft",
+      "type": "density_lte",
+      "source": "config.banned_stems_soft",
+      "match": "\\b<stem>",
+      "case_insensitive": true,
+      "fold_diacritics": true,
+      "value": 1.5,
+      "per_chars": 1000,
+      "min_hits": 2,
+      "suspended_by_flags": [
+        "rejestr_prawniczy"
+      ],
+      "desc": "Rdzenie z udokumentowanym legalnym użyciem: „umowa kompleksowa” i „personel kluczowy” to terminy ustawowe, „serwer dedykowany” i „efekty synergii” to utrwalone terminy fachowe, a „należy podkreślić” i „reasumując” to kanoniczne formuły orzecznictwa. Tellem jest dopiero nagromadzenie, więc mierzymy gęstość zamiast zakazywać. Do dwóch wystąpień przechodzi zawsze, powyżej liczy się limit na 1000 znaków. W rejestrze prawniczym zawieszona w całości."
+    },
+    {
+      "id": "first_line_not_filler",
+      "type": "first_nonempty_line_not_startswith",
+      "source": "config.filler_openers_pl",
+      "case_insensitive": true,
+      "fold_diacritics": true,
+      "desc": "Pierwszy niepusty wiersz nie zaczyna się od wypełniacza ani od retorycznego otwarcia (wzorce 33 i 34). Lista zawiera wyłącznie otwarcia bez legalnego użycia w piśmie urzędowym; formuły pism sprawdza osobna asercja first_line_not_formula."
+    },
+    {
+      "id": "first_line_not_formula",
+      "type": "first_nonempty_line_not_startswith",
+      "source": "config.filler_openers_formuly_pism",
+      "case_insensitive": true,
+      "fold_diacritics": true,
+      "suspended_by_flags": [
+        "rejestr_prawniczy"
+      ],
+      "desc": "Formuły pism otwierające tekst („Należy podkreślić”, „Podsumowując”, „Ponadto”) są wypełniaczem w prozie zwykłej, ale kanonem w piśmie urzędowym i orzeczeniu. Wzorce 23 i 24 obowiązują w rejestrze prawniczym poza formułami pism, więc ta asercja jest tam zawieszona."
+    },
+    {
+      "id": "no_chatbot_artifacts",
+      "type": "stems_absent",
+      "source": "config.chatbot_artifacts",
+      "match": "\\b<stem>",
+      "case_insensitive": true,
+      "fold_diacritics": true,
+      "desc": "Zero artefaktów rozmowy z asystentem i zastrzeżeń o dacie wiedzy (wzorce 20 i 21)."
+    },
+    {
+      "id": "no_emoji",
+      "type": "regex_absent",
+      "pattern": "[\u2600-\u27bf\u2b00-\u2bff\ud83c\udc00-\ud83e\udfff\ufe0f]",
+      "desc": "Zero emoji i piktogramów ozdobnych (wzorzec 18)."
+    },
+    {
+      "id": "length_ratio",
+      "type": "length_ratio_lte",
+      "value": 1.05,
+      "suspended_by_flags": [
+        "rejestr_prawniczy"
+      ],
+      "desc": "Wyjście nie puchnie: najwyżej 5 procent znaków więcej niż wejście. W rejestrze prawniczym zawieszona (terminy zdefiniowane muszą się powtarzać)."
+    },
+    {
+      "id": "konektory_density",
+      "type": "density_lte",
+      "source": "config.konektory_pl",
+      "match": "\\b<stem>",
+      "case_insensitive": true,
+      "fold_diacritics": true,
+      "value": 2.0,
+      "per_chars": 1000,
+      "min_hits": 2,
+      "suspended_by_flags": [
+        "rejestr_prawniczy"
+      ],
+      "desc": "Wzorzec 34: sygnałem jest KONDENSACJA łączników, nie pojedyncze wystąpienie. Do dwóch wystąpień przechodzi zawsze, powyżej obowiązuje limit 2 na 1000 znaków. W rejestrze prawniczym zawieszona."
+    },
+    {
+      "id": "pl_diacritics",
+      "type": "regex_present",
+      "pattern": "[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]",
+      "when_input_regex": "[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]",
+      "desc": "Jeśli wejście ma diakrytyki, wyjście też je ma. Case tekstu bez ogonków pomija tę asercję automatycznie."
+    }
+  ],
+  "cases": [
+    {
+      "name": "golden_post_linkedin",
+      "genre": "post LinkedIn",
+      "note": "Slop marketingowy z pełnym kompletem: otwarcie 34, staccato 9 i 31, mgliste atrybucje 5, słownictwo 7, emoji 18, hasztag wielbłądzi 41. W wyjściu zostają obie liczby razem z informacją o skróceniu oraz teza o zmianie myślenia; twierdzenie podparte na 'eksperci są zgodni' wypada, bo bez źródła nie ma pokrycia. Hasztag zmienia wielkość liter, nie nazwę.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "🔥 W dzisiejszym dynamicznym świecie kluczowe znaczenie ma kompleksowe podejście do obsługi klienta.\n\nTo nie jest kolejna zmiana procesu. To zmiana myślenia. Bez tarcia. Bez zbędnych kroków.\n\nW zeszłym miesiącu skróciliśmy czas pierwszej odpowiedzi z 26 do 8 godzin. Eksperci są zgodni, że klienci doceniają szybkość. Ponadto oczekiwania rosną z kwartału na kwartał, a automatyzacja zyskuje na znaczeniu. Nasze innowacyjne, dedykowane rozwiązanie pozwala uwolnić pełny potencjał zespołu.\n\nReasumując: to ekscytująca droga, która zmienia wszystko. Czekam na Wasze komentarze! #ObsługaKlientaPrzyszłości",
+      "output": "W zeszłym miesiącu skróciliśmy czas pierwszej odpowiedzi z 26 do 8 godzin.\n\nZmieniło się przy tym myślenie o obsłudze, a nie sam proces. Czekam na Wasze komentarze.\n\n#obsługaklientaprzyszłości",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_blog",
+      "genre": "wpis blogowy",
+      "note": "Slop poradnikowy: Title Case 17, zapowiedź 28, nagłówek-atrapa 29, łańcuch konektorów 34, długi myślnik bez spacji 14, ogólnikowe zakończenie 25. Wyjście zachowuje jedyny konkret (próg 20 faktur) i domyka reakcją autora na własne doświadczenie: mówi, co autor stąd wyniósł, i niczego nie orzeka o dziedzinie ani o przyczynach.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "## Jak Wybrać System Do Fakturowania W Małej Firmie\n\nWybór systemu do fakturowania to kluczowa decyzja. Przyjrzyjmy się bliżej temu zagadnieniu.\n\nW dobie cyfryzacji każda firma wystawia faktury. Co więcej, przepisy się zmieniają. Ponadto klienci oczekują szybkiej obsługi. W rezultacie rośnie znaczenie automatyzacji.\n\nKluczowym kryterium jest liczba dokumentów. Nasze doświadczenie pokazuje, że darmowy plan wystarcza do 20 faktur miesięcznie, a powyżej tej granicy zaczynają się problemy—ręczne poprawki, dublowanie numerów, kłopoty z eksportem do księgowości.\n\nReasumując, warto mieć to z tyłu głowy. Przyszłość branży maluje się w jasnych barwach.",
+      "output": "## Jak wybrać system do fakturowania w małej firmie\n\nNajważniejsze kryterium to liczba dokumentów. Z naszego doświadczenia darmowy plan wystarcza do 20 faktur miesięcznie, a powyżej tej granicy zaczynają się ręczne poprawki, dublowanie numerów i kłopoty z eksportem do księgowości.\n\nPrzepisy się zmieniają, a klienci oczekują szybkiej obsługi. Ten próg to jedyna liczba, jaką z takiego wyboru wyniosłem.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_mail_sluzbowy",
+      "genre": "mail służbowy",
+      "note": "Napisany od zera po G2 (poprzednia wersja kopiowała parę 3 z przyklady.md). Ton służalczy 22, wypełniacze 23, kalka 'dedykowany' 26, artefakty asystenta 20. Formuły grzecznościowe zostają nietknięte: uprzejmość wobec adresata jest cechą gatunku. Przeżywają wszystkie ustalenia: numer sali, piętro, godzina, zrobiona rezerwacja i zapowiedź maila do uczestników. Wypada wyłącznie 'dołożymy wszelkich starań', bo nie niesie zobowiązania.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Dzień dobry,\n\nDziękujemy za wiadomość, to bardzo dobre pytanie! Chętnie wszystko wyjaśnimy. Na dzień dzisiejszy, w związku z faktem, iż sala numer 3 przechodzi remont, warsztat zostanie przeniesiony.\n\nNasz dedykowany zespół dokonał rezerwacji sali numer 7 na tym samym piętrze. Warto zauważyć, że godzina rozpoczęcia pozostaje bez zmian, czyli 9.30. Poinformujemy uczestników mailowo do końca dnia. Dołożymy wszelkich starań, aby zmiana nie była uciążliwa.\n\nJesteśmy do Państwa dyspozycji. Mam nadzieję, że to pomoże!\n\nZ poważaniem\nDział szkoleń",
+      "output": "Dzień dobry,\n\nsala numer 3 jest w remoncie, więc warsztat odbędzie się w sali numer 7 na tym samym piętrze. Rezerwacja jest już zrobiona.\n\nGodzina rozpoczęcia nie zmienia się: 9.30. Uczestników poinformujemy mailowo do końca dnia.\n\nZ poważaniem\nDział szkoleń",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_dokumentacja_techniczna",
+      "genre": "dokumentacja techniczna",
+      "note": "Lista z pogrubionym nagłówkiem śródwierszowym 16, Title Case 17, emoji 18, zapowiedź 28, nagłówek-atrapa 29, pisanie od zmiany 30, strona bierna 13. Wyjście trzyma kolejność i treść kroków oraz wszystkie wartości parametru; zdanie o zastąpieniu wcześniejszego mechanizmu wypada zgodnie ze wzorcem 30, bo dokument nie jest przewodnikiem migracji.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "## Konfiguracja Eksportu Danych\n\nEksport danych stanowi zaawansowaną funkcję platformy. Zanurzmy się w szczegóły ustawień.\n\nTa funkcja została dodana, aby zastąpić wcześniejszy mechanizm. Obecnie eksport jest uruchamiany przez system raz na dobę.\n\n- **Format:** Format wybiera się z listy: CSV lub JSON.\n- **Godzina:** Godzinę uruchomienia ustawia się w polu \"Harmonogram\".\n\nKonfiguracja jest zapisywana automatycznie. 🎉",
+      "output": "## Konfiguracja eksportu danych\n\nSystem uruchamia eksport raz na dobę.\n\n1. Wybierz format: CSV albo JSON.\n2. Ustaw godzinę uruchomienia w polu „Harmonogram”.\n\nKonfiguracja zapisuje się automatycznie.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_notatka_wewnetrzna",
+      "genre": "notatka wewnętrzna",
+      "note": "Napisana od zera po G2 (poprzednia wersja kopiowała parę 5 z przyklady.md). Nominalizacja 37, błąd zgodności przy liczebniku nieokreślonym 38, wypełniacze 23, Title Case 17, kalka 'zaadresowany' 26, puste domknięcie 25. Nominalizacje wracają do form osobowych, a nie znikają: 'zidentyfikowanie zalegających partii' to w notatce ustalenie merytoryczne. Przeżywają 40 palet, pół roku i obserwacja o etykietach.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Notatka Z Przeglądu Magazynu\n\nW celu usprawnienia rotacji towaru dokonaliśmy przeglądu regałów w strefie B. Warto podkreślić, że temat jest istotny.\n\nZidentyfikowanie zalegających partii oraz dokonanie porównania dat przydatności wykazało, że 40 palet stoi w strefie B dłużej niż pół roku. Wielu magazynierów zgłosili, że etykiety odklejają się od folii.\n\nUstaliliśmy, że temat zostanie zaadresowany za miesiąc. Podsumowując, przegląd przebiegł sprawnie.",
+      "output": "Notatka z przeglądu magazynu\n\nPrzejrzeliśmy regały w strefie B, żeby usprawnić rotację towaru. Rozpoznaliśmy zalegające partie i porównaliśmy daty przydatności: 40 palet stoi w strefie B dłużej niż pół roku. Wielu magazynierów zgłosiło, że etykiety odklejają się od folii.\n\nUstaliliśmy, że wracamy do tego za miesiąc.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_bez_ogonkow",
+      "genre": "opis oferty bez diakrytyków",
+      "note": "Napisany od zera po G2 (poprzednia wersja kopiowała parę 9 z przyklady.md). Slop pisany bez ogonków. Sprawdza składanie diakrytyków w runnerze: rdzenie z evals.json mają ogonki, więc bez fold() cały słownik przeszedłby tu niezauważony. Wyjście zostaje bez ogonków, bo zamrożony SKILL.md zakazuje dopisywania ich za autora. Asercja pl_diacritics pomija się sama przez when_input_regex.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "W erze cyfrowej edukacja finansowa staje sie kluczowa dla kazdego.\n\nNasz innowacyjny, dedykowany kurs pozwala uwolnic pelny potencjal uczestnika. Warto zauwazyc, ze material dzieli sie na 12 modulow. Dodatkowo dostep do platformy nie wygasa.\n\nPodsumowujac: to przelomowe rozwiazanie, ktore zmienia wszystko. Mam nadzieje, ze to pomoze!",
+      "output": "Kurs edukacji finansowej dzieli sie na 12 modulow. Dostep do platformy nie wygasa.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_mieszany_pl_en",
+      "genre": "wiadomość do zespołu z żargonem angielskim",
+      "note": "Napisany od zera po G2 (poprzednia wersja dzieliła frazy z parą 10 z przyklady.md). Polski tekst z wtrętami angielskimi. Chronione jako żargon zespołu: daily standup, SRE, build, roadmapa, release. Przetłumaczone jako leniwe kalki: dedykowany, zaadresować, insighty, 'dostarcza wartość', 'na koniec dnia', 'kompleksowo'. Decyzja zapada przy każdym słowie osobno (polszczyzna.md §1), więc część angielszczyzny zostaje, a część idzie do tłumaczenia w tym samym zdaniu.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Cześć zespole,\n\nW dzisiejszym dynamicznym środowisku kluczowe jest, aby nasz dedykowany zespół zaadresował temat wolnych buildów.\n\nCo więcej, daily standup dostarcza wartość w oparciu o insighty od zespołu SRE. Ponadto na koniec dnia liczy się stabilny release. Warto zauważyć, że roadmapa jest kompleksowo zaktualizowana.\n\nMam nadzieję, że to pomoże! Daj znać, jeśli masz pytania.",
+      "output": "Cześć zespole,\n\nnasz zespół zajmie się wolnymi buildami.\n\nDaily standup opiera się na spostrzeżeniach zespołu SRE. Ostatecznie liczy się stabilny release. Roadmapa jest zaktualizowana.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_proza_literacka",
+      "genre": "proza literacka z dialogiem",
+      "note": "Jedyny case z flagą gatunek_literacki=true i flaga jest tu NOŚNA: wiersz „Piotr wzruszył ramionami. — Nie wiem…” ma pauzę w środku wiersza, który nie otwiera się pauzą, więc bez flagi asercja no_em_dash failuje (sprawdzone przez odwrócenie flagi). To jedyna gałąź konfiguracji, która nie miała pokrycia testowego. Treść świeża, niezależna od pary 11 w przyklady.md. Wzorce: parataksa 36, paralelizm przeczący 9, imiesłów 3, cudzysłów angielski 19, zaimkoza 37. Fabuła, dialog i decyzje narratora zostają w całości.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": true
+      },
+      "input": "Piotr wysiadł z autobusu. Autobus odjechał. Na przystanku nie było nikogo. Deszcz padał od rana.\n\nTo nie był dzień na powroty. To był dzień na przeczekanie.\n\n\"Myślałem, że przyjedziesz jutro,\" powiedział ojciec, otwierając furtkę i nie patrząc mu w oczy. Jego ręce drżały, odzwierciedlając lata pracy w chłodzie.\n\nPiotr wzruszył ramionami. \"Nie wiem, co ci powiedzieć.\"\n\nPostawił torbę na ziemi.",
+      "output": "Piotr wysiadł z autobusu, a ten odjechał. Na pustym przystanku deszcz padał od rana. To był dzień na przeczekanie, nie na powroty.\n\n— Myślałem, że przyjedziesz jutro — powiedział ojciec. Otworzył furtkę i nie patrzył mu w oczy. Ręce mu drżały i w tym drżeniu widać było lata pracy w chłodzie.\n\nPiotr wzruszył ramionami. — Nie wiem, co ci powiedzieć.\n\nPostawił torbę na ziemi.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_kontrola_prawnicza",
+      "genre": "uzasadnienie orzeczenia",
+      "note": "Kontrola rejestru prawniczego. Input to poprawne uzasadnienie z terminologią ustawową (formuły 'należy podkreślić', 'bez wątpienia', 'reasumując' oraz terminy 'umowa kompleksowa' i 'personel kluczowy' — wszystkie sprawdzone w SCRATCH/redteam/fp_test.py) plus dwie usterki typograficzne z autokorekty edytora. Wyjście poprawia WYŁĄCZNIE typografię: cudzysłów angielski na polski i myślnik bez spacji na przecinek. Terminologia, formy bezosobowe i powtórzenia terminów zdefiniowanych nietknięte. Asercje banned_stems_soft, first_line_not_formula, length_ratio i konektory_density zawieszone flagą.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": true,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Sąd zważył, co następuje.\n\nNależy podkreślić, że powód nie wykazał przesłanki winy. Bez wątpienia obowiązek dowodowy spoczywał w tym zakresie na stronie powodowej. Przedmiotem sporu była umowa kompleksowa dostawy energii elektrycznej, a w szczególności zakres pojęcia “personel kluczowy” użytego w specyfikacji warunków zamówienia.\n\nReasumując—powództwo podlegało oddaleniu w całości.",
+      "output": "Sąd zważył, co następuje.\n\nNależy podkreślić, że powód nie wykazał przesłanki winy. Bez wątpienia obowiązek dowodowy spoczywał w tym zakresie na stronie powodowej. Przedmiotem sporu była umowa kompleksowa dostawy energii elektrycznej, a w szczególności zakres pojęcia „personel kluczowy” użytego w specyfikacji warunków zamówienia.\n\nReasumując, powództwo podlegało oddaleniu w całości.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "golden_kontrola_ludzka",
+      "genre": "notatka z dyżuru",
+      "note": "Kontrola ludzka: dobry tekst człowieka wychodzi bez jednej zmiany. Zawiera trzy konstrukcje, które naiwny walidator wziąłby za tell, a które są poprawną polszczyzną: pauza dialogowa (U+2014 na początku i w środku wiersza otwartego pauzą), zakres godzin półpauzą bez spacji oraz 'serwer dedykowany' jako utrwalony termin techniczny. Runner wymusza tu identyczność wejścia i wyjścia. Ten case jest jedynym w zestawie strażnikiem gałęzi „pauza dialogowa na początku wiersza” w asercji no_em_dash, dlatego asercja celowo nie jest przy human_control zawieszana. Gdyby kolejny tekst kontrolny używał wydawniczej pauzy zdaniowej ze spacjami zamiast półpauzy, trzeba wrócić do decyzji o zawieszeniu.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": true,
+        "gatunek_literacki": false
+      },
+      "input": "Notatka z dyżuru, wtorek\n\nZmiana szła od dziesiątej do osiemnastej, ale realnie zrobiło się coś dopiero w godz. 10–12, bo potem posypał się serwer dedykowany pod raporty.\n\n— Restartowałeś go w ogóle? — zapytał Marek, kiedy wreszcie wszedł.\n\n— Dwa razy. Za trzecim wstał i stoi do teraz.\n\nZostawiam to tak, jak jest. Jeśli w środę znowu padnie, dzwonimy do hostingu i piszemy zgłoszenie z dopiskiem „powtarza się co tydzień”, bo inaczej nikt tego nie ruszy.",
+      "output": "Notatka z dyżuru, wtorek\n\nZmiana szła od dziesiątej do osiemnastej, ale realnie zrobiło się coś dopiero w godz. 10–12, bo potem posypał się serwer dedykowany pod raporty.\n\n— Restartowałeś go w ogóle? — zapytał Marek, kiedy wreszcie wszedł.\n\n— Dwa razy. Za trzecim wstał i stoi do teraz.\n\nZostawiam to tak, jak jest. Jeśli w środę znowu padnie, dzwonimy do hostingu i piszemy zgłoszenie z dopiskiem „powtarza się co tydzień”, bo inaczej nikt tego nie ruszy.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "regresja_fold_diakrytykow",
+      "genre": "case regresyjny, nie golden",
+      "author": "inzynier",
+      "note": "Case regresyjny autorstwa inzyniera (zestaw golden 1-10 napisal autor-przykladow). Jedyny case z CELOWO wadliwym wyjsciem: zostawia rdzen slopowy zapisany bez ogonkow, wiec banned_stems_hard ma go zlapac i expect jest tu false. Strzeze skladania diakrytykow: wylaczenie fold_diacritics w rejestrze albo zdjecie bramkowania stanem wejscia sprawia, ze rdzen przestaje pasowac, asercja przechodzi wbrew oczekiwaniu i caly zestaw wywala sie kodem 1. Dobrym wyjsciem nie da sie tej galezi upilnowac, bo poprawny tekst nie zawiera rdzeni slopowych w zadnej postaci.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "W dzisiejszym dynamicznie rozwijajacym sie swiecie nasze przelomowe rozwiazanie uwalnia pelny potencjal zespolu. To fascynujace narzedzie zmienia wszystko i przynosi wymierne korzysci juz od pierwszego dnia wdrozenia.",
+      "output": "Przelomowe rozwiazanie skraca obsluge zgloszenia z dwoch dni do czterech godzin.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": false,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      },
+      "kind": "regresja"
+    },
+    {
+      "name": "regresja_prog_tolerancji_gestosci",
+      "genre": "case regresyjny, nie golden",
+      "kind": "regresja",
+      "author": "inzynier",
+      "note": "Case regresyjny autorstwa inzyniera. Straznik progu min_hits w asercji banned_stems_soft. Wyjscie zawiera DOKLADNIE dwa rdzenie miekkie (utrwalony termin techniczny uzyty dwa razy), czyli tyle, ile prog tolerancji przepuszcza bez liczenia gestosci. Zniesienie progu albo jego obnizenie sprawia, ze gestosc 2 na 1000 znakow przekracza limit 1.5, asercja failuje wbrew oczekiwaniu i zestaw wywala sie kodem 1. To pilnuje ustalenia z bramki G1, ze dwa wystapienia terminu fachowego w krotkim tekscie sa poprawna polszczyzna, a nie tellem.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Serwer dedykowany obsługuje ruch produkcyjny, a łącze dedykowane zapewnia przepustowość dziesięciu gigabitów na sekundę dla wszystkich oddziałów firmy.",
+      "output": "Serwer dedykowany obsługuje ruch produkcyjny, a łącze dedykowane zapewnia 10 Gb/s.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "regresja_rdzen_obiektowy",
+      "genre": "case regresyjny, nie golden",
+      "kind": "regresja",
+      "author": "inzynier",
+      "note": "Case regresyjny autorstwa inzyniera. Straznik efektu rdzenia obiektowego: wpis {stem: niezwykle, fold: false} w banned_stems_soft. Wejscie jest bez ogonkow, wiec skladanie diakrytykow na poziomie asercji jest aktywne; wyjscie zawiera trzy formy przymiotnika niezwykly z ogonkami. Przy dzialajacym wyjatku rdzen szuka w tekscie oryginalnym i nie widzi ich wcale. Splaszczenie wpisu do zwyklego lancucha sprawia, ze rdzen zaczyna szukac w tekscie zlozonym, lapie trzy formy przymiotnika jako intensyfikator, gestosc 3.00 przekracza limit i zestaw wywala sie kodem 1. To pilnuje ustalenia G1 5.4, ze przymiotnik niezwykly nie moze byc mylony z przyslowkiem niezwykle.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Swiadek opisal zdarzenie jako niezwykle i trudne do wyjasnienia w swietle zebranych dowodow. Sad wzial pod uwage wage tej okolicznosci oraz caly charakter przebiegu zdarzen w tej wlasnie sprawie.",
+      "output": "Świadek opisał zdarzenie jako niezwykłe. Sąd wziął pod uwagę wagę tej niezwykłej okoliczności oraz charakter niezwykłego przebiegu zdarzeń.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "regresja_emoji",
+      "genre": "case regresyjny, nie golden",
+      "kind": "regresja",
+      "author": "inzynier",
+      "note": "Case regresyjny autorstwa inzyniera. Straznik asercji no_emoji, ktora w bramce G1 nalezala do mechanizmow blokerowych. Wyjscie CELOWO konczy sie emoji, wiec expect dla no_emoji jest false. Usuniecie asercji z rejestru albo uszkodzenie zakresu znakow sprawia, ze naruszenie przestaje byc widziane, oczekiwanie sie nie zgadza i zestaw wywala sie kodem 1. Zadne poprawne wyjscie nie upilnuje tej asercji, bo z definicji nie zawiera emoji.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Nowa wersja panelu skraca logowanie do dwoch krokow zamiast czterech, co powinno zauwazyc kazdy uzytkownik korzystajacy z systemu codziennie rano.",
+      "output": "Nowa wersja panelu skraca logowanie do dwóch kroków. 🎉",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": true,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": false,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    },
+    {
+      "name": "regresja_para_cudzyslowu",
+      "genre": "case regresyjny, nie golden",
+      "kind": "regresja",
+      "author": "inzynier",
+      "note": "Case regresyjny autorstwa inzyniera. Straznik wykrywania pary otwartej polskim cudzyslowem i domknietej prostym - to byl BLOKER 3.1 z bramki G1, znaleziony wtedy w czterech plikach dokumentacji. Wyjscie CELOWO zawiera taka pare, wiec expect dla no_english_quotes jest false. Uszkodzenie tej galezi kontroli english_quotes sprawia, ze defekt przestaje byc widziany i zestaw wywala sie kodem 1. Poprawne wyjscie tego nie upilnuje, bo ma cudzyslowy sparowane.",
+      "flags": {
+        "regula_anty_tell": false,
+        "rejestr_prawniczy": false,
+        "human_control": false,
+        "gatunek_literacki": false
+      },
+      "input": "Kierownik zmiany zapisal w protokole uwage o powtarzajacej sie usterce i przekazal zgloszenie do dzialu utrzymania ruchu jeszcze tego samego dnia roboczego.",
+      "output": "Kierownik zapisał w protokole „usterka powtarza się co tydzień\" i przekazał zgłoszenie dalej.",
+      "expect": {
+        "no_em_dash": true,
+        "endash_pwn": true,
+        "no_english_quotes": false,
+        "banned_stems_hard": true,
+        "banned_stems_soft": true,
+        "first_line_not_filler": true,
+        "first_line_not_formula": true,
+        "no_chatbot_artifacts": true,
+        "no_emoji": true,
+        "length_ratio": true,
+        "konektory_density": true,
+        "pl_diacritics": true
+      }
+    }
+  ],
+  "cases_note": "Zestaw golden zamrozony w Fazie 3 po bramce G2. Case'y 1-10 (golden_*) napisal autor-przykladow: tresci fikcyjno-generyczne, rozlaczne z references/przyklady.md (pomiar 8-gramami: dziewiec case'ow zero wspolnych sekwencji, golden_mieszany_pl_en jedno trafienie w wejsciu na liscie sygnalow wzorca 20). Case'y oznaczone kind=regresja (regresja_*) napisal inzynier i NIE sa przykladami redakcji - to wartownicy wlasnych detektorow, ktorych zestaw golden z definicji nie upilnuje, bo poprawne wyjscie nie zawiera ani rdzeni slopowych, ani nagromadzenia terminow. Kazdy case deklaruje komplet asercji rejestru."
+}
