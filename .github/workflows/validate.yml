@@ -1,0 +1,29 @@
+name: Walidacja pakietu
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Spójność pakietu i ewaluacje
+        run: python3 scripts/validate.py --strict
+      - name: Wykrywalność skilla
+        run: npx --yes skills@1.5.20 add . --list
+      - name: Walidacja wtyczki Claude Code
+        run: |
+          npm install --global @anthropic-ai/claude-code
+          claude plugin validate .
